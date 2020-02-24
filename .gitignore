@@ -13,3 +13,7 @@
 
 # IDE settings
 .idea
+
+# Directories
+bin
+coverage

@@ -1,5 +1,6 @@
 # 1. Build env
-FROM golang:1.13.5-alpine AS build-env
+FROM golang:1.13.5-alpine AS build-envv
+ADD goproject goproject
 
 WORKDIR $GOPATH/src/github.com/bytemare/goproject/
 COPY *.go ./
@@ -16,6 +17,7 @@ RUN make build-docker
 
 # 2. Build image
 FROM gcr.io/distroless/static
+LABEL maintainer="Bytemare <dev@bytema.re>"
 COPY --from=build-env /bin/goproject /bin/goproject
 USER nonroot
 ENTRYPOINT ["/bin/goproject"]

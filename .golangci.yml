@@ -1,0 +1,10 @@
+linters-settings:
+  golint:
+    min-confidence: 0
+  maligned:
+    suggest-new: true
+
+linters:
+  enable-all: true
+  disable:
+    - wsl

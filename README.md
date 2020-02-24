@@ -31,3 +31,36 @@ Through a shell download utility :
 ```shell
 curl -sSL go.bytema.re | sh
 ```
+
+
+## Features
+
+- Layout
+    - Don't use pkg/, but internal/ (https://dave.cheney.net/2019/10/06/use-internal-packages-to-reduce-your-public-api-surface)
+    - 
+
+- Makefile
+    - Very generic for broad use and with best practices
+    - Reproducible builds
+        - Uses git tags to set version
+        - Uses git commit hash instead of date to identify build
+   
+- Docker
+    - Image
+        - This template builds the app into a static go binary
+        - The image is based on Distroless for static go binaries
+        - It barely weights 1.82 MB, and only contains certificates, tzdata and /etc/passwd
+    - Run
+        - Makefile contains default parameters for complete lockdown
+        
+- Security profiles
+    - Seccomp
+    A tool to automatically produce a seccomp profile from your app is included
+    - AppArmor
+    A tool to define an AppArmor profile for your app
+    - A tool
+    
+    But you may want to tailor the profiles further to your needs.
+
+
+The app's configuration and the user's profiles are stored in your user's default application configuration directory.

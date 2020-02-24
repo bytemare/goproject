@@ -1,4 +1,21 @@
-#
+package internal
+
+type makefile struct {
+}
+
+func newMakefile() *makefile {
+	return &makefile{}
+}
+
+func NewMakefile() (*ProjectFile, error) {
+	return NewProjectFile("makefile", "Makefile", newMakefile())
+}
+
+func (makefile) getTemplate() string {
+	return makefileTemplate
+}
+
+const makefileTemplate = `#
 # Some copyright
 #
 
@@ -16,7 +33,7 @@ VERSION             := $(shell git describe --tags --always --dirty)
 COMMIT              := $(shell git rev-parse HEAD)
 
 # Go compiler flags
-LD_BIN_INFO         := -X "upgrade.version=$(VERSION)" -X "upgrade.commit=$(COMMIT)"
+LD_BIN_INFO         := -X "main.version=$(VERSION)" -X "main.commit=$(COMMIT)"
 LD_STATIC           := -extldflags "-static" -installsuffix "-static"
 LD_LIGHT            := -s -w
 LD_NO_UNSAFE_PKG    := -u
@@ -43,35 +60,35 @@ all: build
 
 # Create directories and build project
 $(BINARY):
-	@mkdir -p $@
+@mkdir -p $@
 
 build:
-	@go build -v \
-	    -ldflags '$(LD_BIN_INFO)' \
-	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)
+@go build -v \
+-ldflags '$(LD_BIN_INFO)' \
+-o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)
 
 install:
-	@go install $(LD_FLAGS) -v -o $(BUILD_DIR)/$(BINARY)
+@go install $(LD_FLAGS) -v -o $(BUILD_DIR)/$(BINARY)
 
 lint:
-	@golangci-lint run ./...
+@golangci-lint run ./...
 
 test:
-	@go test -v -i -race $(PACKAGES)
+@go test -v -i -race $(PACKAGES)
 
 cover:
-	@for PACK in $(PACKAGES); do \
-		echo "Testing $(PACK)"
-		go test -v -i -race -covermode=atomic \
-                	-coverpkg=$(PACKAGES) \
-	                -coverprofile=$(COVERAGE)/unit-`echo $$PACK | tr "/" "_"`.out
-	done
+@for PACK in $(PACKAGES); do \
+echo "Testing $(PACK)"
+go test -v -i -race -covermode=atomic \
+-coverpkg=$(PACKAGES) \
+-coverprofile=$(COVERAGE)/unit-` + "echo $$PACK | tr \"/\" \"_\"`" + `.out
+done
 
 version:
-	@echo $(VERSION)
+@echo $(VERSION)
 
 clean:
-	rm -rf $(BUILD_DIR) $(COVERAGE)
+rm -rf $(BUILD_DIR) $(COVERAGE)
 
 #
 #   Docker
@@ -89,18 +106,18 @@ DOCKER_LOCKDOWN         := $(DOCKER_NO_NETWORK) $(DOCKER_DROP_CAP) $(DOCKER_RO)
 DOCKER_SHARE_FS         := --mount type=bind,source="$file",target=/"$base",readonly
 
 build-docker:
-    # Build seccomp profile
-    @go2seccomp $(BINARY) $(SECCOMP) \
-    # Build binary
-	@$(DOCKER_GO_COMPILER_ENV) \
-	 go build -a -msan -u \
-	 --tags netgo \
-	 -ldflags $(LD_ALL_FLAGS)
-	 -o $(BINARY)
+# Build seccomp profile
+@go2seccomp $(BINARY) $(SECCOMP) \
+# Build binary
+@$(DOCKER_GO_COMPILER_ENV) \
+go build -a -msan -u \
+--tags netgo \
+-ldflags $(LD_ALL_FLAGS)
+-o $(BINARY)
 
 docker-run:
-    @docker run \
-        $(DOCKER_LOCKDOWN) \
-        --rm \  # remove container after shutdown
-        -i \    # allow sending and receiving on STDIN
-
+@docker run \
+$(DOCKER_LOCKDOWN) \
+--rm \  # remove container after shutdown
+-i \    # allow sending and receiving on STDIN
+`

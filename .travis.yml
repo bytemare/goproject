@@ -29,7 +29,7 @@ jobs:
         - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
         - npm install -g snyk
       script:
-        - golangci-lint run ./...
+        - golangci-lint run -v ./...
         - snyk test
       after_success:
         - snyk monitor
