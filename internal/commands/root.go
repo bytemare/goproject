@@ -1,10 +1,12 @@
-package cmd
+// Package commands holds the different CLI commands
+package commands
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/bytemare/goproject/internal/config"
+
 	"github.com/spf13/cobra"
 )
 
@@ -39,4 +41,6 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	os.Exit(0)
 }

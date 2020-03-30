@@ -1,33 +1,45 @@
-package internal
-
-import (
-	"github.com/spf13/viper"
-)
+// Package templates holds the template and project building functions
+package templates
 
 type travis struct {
+	*file
 	RepoURL  string
 	SonarOrg string
 }
 
-//func newTravis(repoURL, sonarOrg string) *travis {
+// travisConstructor returns the file content populated with the relevant values
+func travisConstructor(project *Project) (*file, error) {
+	conf := project.Profile.Conf
+	sonarOrg := conf.GetString("sonar.org")
+	repoURL := conf.GetString("git.URL")
+
+	return newProjectFile(newTravis(repoURL, sonarOrg))
+}
+
 func newTravis(repoURL, sonarOrg string) *travis {
 	return &travis{
+		file:     newFile(travisIdentifier, travisFilename, travisTemplate),
 		RepoURL:  repoURL,
 		SonarOrg: sonarOrg,
 	}
 }
 
-func NewTravis(conf *viper.Viper) (*ProjectFile, error) {
-	sonarOrg := conf.GetString("sonar.org")
-	repoURL := conf.GetString("git.URL")
-	return NewProjectFile("travis", ".travis.yml", newTravis(repoURL, sonarOrg))
+func (t *travis) getIdentifier() string {
+	return t.identifier
 }
 
-func (travis) getTemplate() string {
-	return travisTemplate
+func (t *travis) getFilename() string {
+	return t.filename
 }
 
-const travisTemplate = `language: go
+func (t *travis) getTemplate() string {
+	return t.template
+}
+
+const (
+	travisIdentifier = "travis"
+	travisFilename   = ".travis.yml"
+	travisTemplate   = `language: go
 
 env:
   - GO111MODULE=on
@@ -90,3 +102,4 @@ os:
 script:
   - go test -v -race
 `
+)

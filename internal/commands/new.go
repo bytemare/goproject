@@ -1,14 +1,15 @@
-package cmd
+// Package commands holds the different CLI commands
+package commands
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/bytemare/goproject/internal"
 	"github.com/bytemare/goproject/internal/config"
-	"github.com/spf13/viper"
+	"github.com/bytemare/goproject/internal/templates"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // newCmd represents the new command
@@ -29,7 +30,7 @@ and create the files and directories as specified in the profile.
 
 Will do the same but with the specified profile
 `,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			setupNewProject(cmd, args)
 
@@ -48,7 +49,19 @@ Will do the same but with the specified profile
 }
 
 func setupNewProject(cmd *cobra.Command, args []string) {
-	viper.Set("name", args[0])
+	// If no argument was given, we develop the project inside the current directory, thus inheriting its name
+	if len(args) == 0 {
+		wd, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("Unable to get working directory : %s\n", err)
+			os.Exit(1)
+		}
+
+		viper.Set("name", wd)
+	} else {
+		viper.Set("name", args[0])
+	}
+
 	if cmd.Flag("profile").Value.String() != "" {
 		viper.Set("profile", cmd.Flag("profile").Value.String())
 	}
@@ -66,7 +79,7 @@ func newProject() {
 	if profileName == "" {
 		fmt.Println("Loading default profile")
 		// No profile was specified, we're therefore calling the default profile
-		profileName = viper.GetString(config.DefaultProfileConfigKeyName)
+		profileName = viper.GetString(config.DefaultConfigProfileKeyName)
 		if profileName == "" {
 			fmt.Println("Error : no profile was specified, and no default profile was found.")
 			os.Exit(1)
@@ -81,12 +94,15 @@ func newProject() {
 
 	// Initiate and create project
 	projectName := viper.GetString("name")
-	//projectLocation := viper.GetString("location")
-	projectLocation := "."
 
-	project := internal.NewProject(prof, projectName, projectLocation)
+	projectLocation := viper.GetString("location")
+	if projectLocation == "" {
+		projectLocation = config.DefaultTargetProjectLocation
+	}
 
-	// Build Project
+	project := templates.NewProject(prof, projectName, projectLocation)
+
+	// Build project
 	if err := project.Build(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -1,18 +1,15 @@
-package internal
+// Package templates holds the template and project building functions
+package templates
 
-type golangci struct {
+// golangciConstructor returns the file content populated with the relevant values
+func golangciConstructor(project *Project) (*file, error) { //nolint:unparam // project is not needed when no variables
+	return newProjectFile(newFile(golangciIdentifier, golangciFilename, golangciTemplate))
 }
 
-func newGolangCI() *golangci {
-	return &golangci{}
-}
-
-func NewGolangCI() (*ProjectFile, error) {
-	return NewProjectFile("golangci", ".golangci.yml", newGolangCI())
-}
-
-func (golangci) getTemplate() string {
-	return `linters-settings:
+const (
+	golangciIdentifier = "golangci"
+	golangciFilename   = ".golangci.yml"
+	golangciTemplate   = `linters-settings:
   golint:
     min-confidence: 0
   maligned:
@@ -23,4 +20,4 @@ linters:
   disable:
     - wsl
 `
-}
+)

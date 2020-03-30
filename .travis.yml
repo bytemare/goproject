@@ -16,24 +16,28 @@ notifications:
 stages:
   - "Static Analysis, Unit Tests and Coverage"
   - test
-  #- name: deploy
-  #    if: branch = master
+  - name: deploy
+    if: branch = release
 
 jobs:
   include:
     - stage: "Static Analysis, Unit Tests and Coverage"
-      go: 1.13.x
-      name: "GolangCI Linting and Snyk Analysis"
+      go: 1.14.x
+      name: "GolangCI Linting,  and Snyk Analysis"
       os: linux
       install:
-        - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+        - make setup
         - npm install -g snyk
       script:
-        - golangci-lint run -v ./...
+        - pre-commit install
+        - pre-commit autoupdate
+        - pre-commit run --all-files
+        - make lint
+        - make sec
         - snyk test
       after_success:
         - snyk monitor
-    - go: 1.13.x
+    - go: 1.14.x
       name: "Unit Tests and Coverage"
       addons:
         sonarcloud:
@@ -42,19 +46,30 @@ jobs:
             secure: ${SONAR_TOKEN}
       os: linux
       script:
-        - go test -v -race -coverprofile=coverage.out -covermode=atomic
+        - make cover
       after_success:
         - sonar-scanner
         - bash <(curl -s https://codecov.io/bash)
         - goveralls -coverprofile=coverage.out -service=travis-ci
+    - stage: release
+      name: "Release a new version"
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - nvm install lts/*
+          - npx semantic-release
+        on:
+          all_branches: true
 
 go:
   - 1.11.x
   - 1.12.x
   - 1.13.x
+  - 1.14.x
 os:
   - linux
   - osx
   - windows
 script:
-  - go test -v -race
+  - make test

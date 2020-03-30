@@ -1,18 +1,15 @@
-package internal
+// Package templates holds the template and project building functions
+package templates
 
-type gitignore struct {
+// gitignoreConstructor returns the file content populated with the relevant values
+func gitignoreConstructor(project *Project) (*file, error) { //nolint:unparam // project is not needed when no variables
+	return newProjectFile(newFile(gitignoreIdentifier, gitignoreFilename, gitignoreTemplate))
 }
 
-func newGitignore() *gitignore {
-	return &gitignore{}
-}
-
-func NewGitIgnore() (*ProjectFile, error) {
-	return NewProjectFile("gitignore", ".gitignore", newGitignore())
-}
-
-func (gitignore) getTemplate() string {
-	return `# Binaries for programs and plugins
+const (
+	gitignoreIdentifier = "gitignore"
+	gitignoreFilename   = ".gitignore"
+	gitignoreTemplate   = `# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
@@ -32,4 +29,4 @@ func (gitignore) getTemplate() string {
 bin
 coverage
 `
-}
+)

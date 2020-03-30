@@ -1,16 +1,28 @@
-package internal
-
-import "github.com/spf13/viper"
+// Package templates holds the template and project building functions
+package templates
 
 type sonar struct {
+	*file
 	SonarOrg     string
 	SonarProject string
 	RepoCI       string
 	RepoURL      string
 }
 
+// sonarConstructor returns the file content populated with the relevant values
+func sonarConstructor(project *Project) (*file, error) {
+	conf := project.Profile.Conf
+	sonarOrg := conf.GetString("sonar.org")
+	sonarProject := conf.GetString("name")
+	repoCI := conf.GetString("travis.profile")
+	repoURL := conf.GetString("git.URL")
+
+	return newProjectFile(newSonar(sonarOrg, sonarProject, repoCI, repoURL))
+}
+
 func newSonar(sonarOrg, sonarProject, repoCI, repoURL string) *sonar {
 	return &sonar{
+		file:         newFile(sonarIdentifier, sonarFilename, sonarTemplate),
 		SonarOrg:     sonarOrg,
 		SonarProject: sonarProject,
 		RepoCI:       repoCI,
@@ -18,19 +30,22 @@ func newSonar(sonarOrg, sonarProject, repoCI, repoURL string) *sonar {
 	}
 }
 
-func NewSonar(conf *viper.Viper) (*ProjectFile, error) {
-	sonarOrg := conf.GetString("sonar.org")
-	sonarProject := conf.GetString("name")
-	repoCI := conf.GetString("travis.profile")
-	repoURL := conf.GetString("git.URL")
-	return NewProjectFile("sonar", "sonar-project.properties", newSonar(sonarOrg, sonarProject, repoCI, repoURL))
+func (s *sonar) getIdentifier() string {
+	return s.identifier
 }
 
-func (sonar) getTemplate() string {
-	return sonarTemplate
+func (s *sonar) getFilename() string {
+	return s.filename
 }
 
-const sonarTemplate = `# Project identification
+func (s *sonar) getTemplate() string {
+	return s.template
+}
+
+const (
+	sonarIdentifier = "sonar"
+	sonarFilename   = "sonar-Project.properties"
+	sonarTemplate   = `# Project identification
 sonar.organization={{.SonarOrg}}
 sonar.projectKey={{.SonarProject}}
 sonar.projectName={{.SonarProject}}
@@ -43,7 +58,7 @@ sonar.links.scm={{.RepoURL}}
 sonar.host.url=https://sonarcloud.io
 
 # Project files
-# Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.
+# Path is relative to the sonar-Project.properties file. Replace "\" by "/" on Windows.
 # This property is optional if sonar.modules is set.
 sonar.sources=.
 sonar.sourceEncoding=UTF-8
@@ -62,3 +77,4 @@ sonar.go.coverage.reportPaths=./coverage.out
 # Other Modules
 #sonar.go.golangci-lint.reportPaths=
 `
+)

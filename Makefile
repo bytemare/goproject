@@ -2,6 +2,9 @@
 # Some copyright
 #
 
+# Target main files
+TARGETS  := "./cmd/goproject"
+
 # Project path and name
 PROJECT_REPO := $(shell go list -m)
 PROJECT_NAME := $(shell basename $(PROJECT_REPO))
@@ -13,15 +16,19 @@ PACKAGES    := $(shell go list ./...)
 # Use git tags to set version, and commit hash to identify the build
 VERSION             := $(shell git describe --tags --always --dirty)
 COMMIT              := $(shell git rev-parse HEAD)
+DATE                := $(shell date +'%F_%T:%N')
 
 # Go compiler flags
-SYMBOL_NAME_VERSION := "version" # this is the global variable name inside the program code source
-SYMBOL_NAME_COMMIT  := "commit" # this is the global variable name inside the program code source
+# these are the global variables' names inside the program code source
+SYMBOL_NAME_VERSION := "version"
+SYMBOL_NAME_COMMIT  := "commit"
+SYMBOL_NAME_DATE    := "date"
 
 SYMBOLS             =$(shell (go tool nm "$(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)" | grep "$(BINARY)" | grep " D " | cut -d ' ' -f5))
-SYMBOL_PATH_VERSION =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep $(SYMBOL_NAME_VERSION)))
-SYMBOL_PATH_COMMIT  =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep $(SYMBOL_NAME_COMMIT)))
-LD_BIN_INFO         =-X "'$(SYMBOL_PATH_VERSION)=$(VERSION)'" -X "'$(SYMBOL_PATH_COMMIT)=$(COMMIT)'"
+SYMBOL_PATH_VERSION =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_VERSION)$$"))
+SYMBOL_PATH_COMMIT  =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_COMMIT)$$"))
+SYMBOL_PATH_DATE    =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_DATE)$$"))
+LD_BIN_INFO         = -X "'$(SYMBOL_PATH_VERSION)=$(VERSION)'" -X "'$(SYMBOL_PATH_COMMIT)=$(COMMIT)'" -X "'$(SYMBOL_PATH_DATE)=$(DATE)'"
 LD_STATIC           := -extldflags "-static" -installsuffix "-static"
 LD_LIGHT            := -s -w
 #LD_NO_UNSAFE_PKG    := -u
@@ -39,18 +46,36 @@ COVERAGE    := coverage
 # Security profiles
 SECCOMP     := $(BUILD_DIR)/$(BINARY).seccomp
 
+# Make flags
+MAKEFLAGS += --warn-undefined-variables
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := all
+.DELETE_ON_ERROR:
+.SUFFIXES:
+
 #
 #   Commands
 #
 
-all: build
-.PHONY: build install lint test cover version clean
+all:
 
-# Create directories and build project
-$(BINARY):
-	@echo "Creating dirs"
-	@mkdir -p $@
+# Install tools and check environment
+setup:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+	go get -u github.com/securego/gosec/cmd/gosec
+	go get -u github.com/onsi/ginkgo/ginkgo
+	go get -u github.com/onsi/gomega/...
+	pip3 install pre-commit
+	pre-commit install
 
+# Create directories
+.PHONY: dirs
+dirs:
+	@echo "Creating dirs ..."
+	@mkdir -v -p $@
+
+.PHONY: values
 values:
 	@echo "Values"
 	@echo "PROJECT_REPO :" $(PROJECT_REPO)
@@ -59,11 +84,14 @@ values:
 	@echo "PACKAGES :" $(PACKAGES)
 	@echo "VERSION :" $(VERSION)
 	@echo "COMMIT :" $(COMMIT)
+	@echo "DATE :" $(DATE)
 	@echo "SYMBOL_NAME_VERSION :" $(SYMBOL_NAME_VERSION)
 	@echo "SYMBOL_NAME_COMMIT :" $(SYMBOL_NAME_COMMIT)
+	@echo "SYMBOL_NAME_DATE :" $(SYMBOL_NAME_DATE)
 	@echo "SYMBOLS :" $(SYMBOLS)
 	@echo "SYMBOL_PATH_VERSION :" $(SYMBOL_PATH_VERSION)
 	@echo "SYMBOL_PATH_COMMIT :" $(SYMBOL_PATH_COMMIT)
+	@echo "SYMBOL_PATH_DATE :" $(SYMBOL_PATH_DATE)
 	@echo "LD_BIN_INFO :" $(LD_BIN_INFO)
 	@echo "LD_STATIC :" $(LD_STATIC)
 	@echo "LD_LIGHT :" $(LD_LIGHT)
@@ -74,59 +102,82 @@ values:
 	@echo "BUILD_DIR :" $(BUILD_DIR)
 	@echo "COVERAGE :" $(COVERAGE)
 	@echo "SECCOMP :" $(SECCOMP)
+	s:= $(shell echo hello)
+	cp_single:= '$(s)'
+	#cp_double:=
 
+.PHONY: fmt
 fmt:
-	@echo "Formatting"
+	@echo "Formatting ..."
 	@go fmt ./...
 
+.PHONY: lint
 lint: fmt
-	@echo "Linting ..."
-	@golangci-lint run ./...
+	@echo "Linting and security ..."
 	@go vet ./...
+	@golangci-lint run --fix ./...
 
-sec:
-	@echo "Checking security"
-	@gosec -exclude=G204 ./...
+#sec:
+#	@echo "Checking security ..."
+#	@go get -u github.com/securego/gosec/cmd/gosec
+#	@gosec ./...
 
 # Build a first time to read symbol location, then a 2nd time with loading LD FLAGS
-pre-build: lint sec
+.PHONY: pre-build
+pre-build:
+	@echo "Vanilla build of $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)"
 	@go build -v \
-	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)
+	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \
+	    $(TARGETS)
 
-build: pre-build
-	@echo "Building $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)"
-
+.PHONY: build
+build: lint pre-build
+	@echo "Fetching symbols and Building $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH) with flags"
 	@go build -v \
 	    -ldflags '$(LD_ALL_FLAGS)' \
-	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)
+	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \
+	    $(TARGETS)
 
-install: lint sec
+.PHONY: install
+install: lint
 	@echo "Installing $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)""
 	@go install -v \
-	    -ldflags '$(LD_ALL_FLAGS)' \
-	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)
+	    -ldflags $(LD_ALL_FLAGS) \
+	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \
+	    $(TARGETS)
 
-cover: lint sec
-	@echo "Coverage"
+.PHONY: uninstall
+uninstall:
+	@echo "Uninstall $(TARGETS) ... TODO."
+
+.PHONY: cover
+cover:
+	@echo "Coverage ..."
 	@for PACK in $(PACKAGES); do \
 		echo "Testing $(PACK)" \
 		go test -v -i -race -covermode=atomic \
-                	-coverpkg=$(PACKAGES) \
-	                -coverprofile=$(COVERAGE)/unit-`echo $$PACK | tr "/" "_"`.out; done
+		    -coverpkg=$(PACKAGES) \
+		    -coverprofile=$(COVERAGE)/unit-`echo $$PACK | tr "/" "_"`.out; done
 
 GINKGO ?= $(GOBIN)/ginkgo
-test: lint sec build
-	@echo "Testing"
-	@go get -u github.com/onsi/ginkgo/ginkgo
-	@$(GINKGO) -r -v
+# TODO: don't install here, but add it in setup or fix a target
+.PHONY: test
+test:
+	@echo "Testing ..."
 
-release: lint sec
+#@go get -u github.com/onsi/ginkgo/ginkgo
+#@$(GINKGO) -r -v
+
+.PHONY: release
+release: lint
 	@echo "Releasing"
 	goreleaser release
 
+.PHONY: version
 version:
 	@echo $(VERSION) - $(COMMIT)
 
+.PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR) $(COVERAGE)
 
@@ -145,19 +196,20 @@ DOCKER_SECC_PROFILE     := --security-opt="seccomp=$seccomp"
 DOCKER_LOCKDOWN         := $(DOCKER_NO_NETWORK) $(DOCKER_DROP_CAP) $(DOCKER_RO)
 DOCKER_SHARE_FS         := --mount type=bind,source="$file",target=/"$base",readonly
 
+.PHONY: build-docker
 build-docker:
     # Build seccomp profile
     #@go2seccomp $(BINARY) $(SECCOMP)
     # Build binary
 	@$(DOCKER_GO_COMPILER_ENV) \
 	 go build -a -msan -u \
-	 --tags netgo \
-	 -ldflags $(LD_ALL_FLAGS) \
-	 -o $(BINARY)
+	    --tags netgo \
+	    -ldflags $(LD_ALL_FLAGS) \
+	    -o $(BINARY) \
+	    $(TARGETS)
 
-#docker-run:
-#	@docker run \
-#        $(DOCKER_LOCKDOWN) \
-        --rm \  # remove container after shutdown
-#        -i \    # allow sending and receiving on STDIN
-
+.PHONY: docker-run
+docker-run:
+	@docker run \
+	    $(DOCKER_LOCKDOWN) \
+	    --rm -i

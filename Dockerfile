@@ -6,7 +6,7 @@ WORKDIR $GOPATH/src/github.com/bytemare/goproject/
 COPY *.go ./
 COPY go.mod ./
 COPY cmd/ ./cmd/
-COPY pkg/ ./pkg/
+COPY internal/ ./internal/
 COPY .git ./
 COPY Makefile ./
 RUN make build-docker
