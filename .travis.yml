@@ -16,8 +16,8 @@ notifications:
 stages:
   - "Static Analysis, Unit Tests and Coverage"
   - test
-  - name: deploy
-    if: branch = release
+  #- name: deploy
+  #  if: branch = release
 
 jobs:
   include:
@@ -29,11 +29,11 @@ jobs:
         - make setup
         - npm install -g snyk
       script:
+        - make setup
         - pre-commit install
         - pre-commit autoupdate
         - pre-commit run --all-files
         - make lint
-        - make sec
         - snyk test
       after_success:
         - snyk monitor
@@ -49,8 +49,8 @@ jobs:
         - make cover
       after_success:
         - sonar-scanner
-        - bash <(curl -s https://codecov.io/bash)
-        - goveralls -coverprofile=coverage.out -service=travis-ci
+        #- bash <(curl -s https://codecov.io/bash)
+        #- goveralls -coverprofile=coverage.out -service=travis-ci
     - stage: release
       name: "Release a new version"
       deploy:
