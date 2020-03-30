@@ -62,9 +62,7 @@ all:
 
 # Install tools and check environment
 setup:
-	#curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
-	go get -u github.com/securego/gosec/cmd/gosec
 	go get -u github.com/onsi/ginkgo/ginkgo
 	go get -u github.com/onsi/gomega/...
 	pip3 install pre-commit
@@ -103,9 +101,6 @@ values:
 	@echo "BUILD_DIR :" $(BUILD_DIR)
 	@echo "COVERAGE :" $(COVERAGE)
 	@echo "SECCOMP :" $(SECCOMP)
-	s:= $(shell echo hello)
-	cp_single:= '$(s)'
-	#cp_double:=
 
 .PHONY: fmt
 fmt:
@@ -118,10 +113,10 @@ lint: fmt
 	@go vet ./...
 	@golangci-lint run --fix ./...
 
-#sec:
-#	@echo "Checking security ..."
-#	@go get -u github.com/securego/gosec/cmd/gosec
-#	@gosec ./...
+.PHONY: pre-commit
+pre-commit:
+	@echo "Extensive checking with pre-commit ..."
+	@pre-commit run --all-files
 
 # Build a first time to read symbol location, then a 2nd time with loading LD FLAGS
 .PHONY: pre-build
