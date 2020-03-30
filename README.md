@@ -1,8 +1,6 @@
 # goproject
 Set up new go projects with personalised layouts and configuration files for your CI environment.
 
-[]: #
-
 [![Build Status](https://travis-ci.com/bytemare/goproject.svg?branch=master)](https://travis-ci.com/bytemare/goproject)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=goproject&metric=alert_status)](https://sonarcloud.io/dashboard?id=goproject)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=goproject&metric=coverage)](https://sonarcloud.io/dashboard?id=goproject)
@@ -67,7 +65,7 @@ brew upgrade bytemare/tap/goproject
 
 ### Docker
 
-TODO
+> TODO
 ```bash
 ```
 
@@ -81,7 +79,7 @@ go get github.com/bytemare/goproject
 
 The goproject app is configured through environment variables and a file placed in your user's default configuration directory:
 
-TODO: give a path and file content example
+> TODO: give a path and file content example
 
 The app's configuration and the user's profiles are stored in your user's default application configuration directory.
 
@@ -95,14 +93,14 @@ Profiles are stored in the 'profiles' directory next to the configuration file.
 A profile file lists the layout and names the files you usually use within your projects.
 For example, this profile will use 'devName devAdress' as an author and contact, and will create 'doc, makefile, golangci, travis' files
 
-TODO: give example profile content
+> TODO: give example profile content
 
 goproject can only generate files it knows and [are registered](link to map)
 
 To show available profiles and switch between them, use the 'profile' command
 
-'goproject profile --help
-TODO show output'
+> '''goproject profile --help
+TODO show output'''
 
 ## Usage
 
@@ -112,20 +110,20 @@ The CI files come pre-configured. Some CI environments need to be set up on the 
 
 - travis : explain what to do
 - circleci
-- fuzzit : ---
+- fuzzit :
 - sonarcloud
 
 ### First use
 
 Create a profile, when you don't want to use the default one.
 
-TODO: show example
+> TODO: show example
 
 ### Create a new Go project
 
 Nothing simpler
 
-'goproject new'
+'''goproject new'''
 
 ### Deploy files within an already existing project
 
@@ -138,7 +136,7 @@ Not giving 'goproject new' any arguments will take the current directory's name 
 git clone path/remote/repo/project
 cd project
 ls -al
-    TODO: example
+    > TODO: example
 goproject new
 '''
 
