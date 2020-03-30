@@ -25,12 +25,19 @@ jobs:
       go: 1.14.x
       name: "GolangCI Linting,  and Snyk Analysis"
       os: linux
+      apt:
+        update: true
+        packages:
+          - python3-dev
+          - python3-pip
+          - python3-setuptools
       install:
+        - pip3 install --upgrade pip
+        - pip3 install pre-commit
         - make setup
         - npm install -g snyk
       script:
         - make setup
-        - pre-commit install
         - pre-commit autoupdate
         - pre-commit run --all-files
         - make lint
