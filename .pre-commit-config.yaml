@@ -24,10 +24,6 @@ repos:
       - id: conform
         stages:
           - commit-msg
-  - repo: https://gitlab.com/devopshq/gitlab-ci-linter
-    rev: v1.0.0
-    hooks:
-      - id: gitlab-ci-linter
   - repo: https://github.com/syntaqx/git-hooks
     rev: v0.0.16
     hooks:
