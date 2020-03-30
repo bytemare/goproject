@@ -62,7 +62,8 @@ all:
 
 # Install tools and check environment
 setup:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+	#curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $GOPATH/bin latest
 	go get -u github.com/securego/gosec/cmd/gosec
 	go get -u github.com/onsi/ginkgo/ginkgo
 	go get -u github.com/onsi/gomega/...
@@ -124,7 +125,7 @@ lint: fmt
 
 # Build a first time to read symbol location, then a 2nd time with loading LD FLAGS
 .PHONY: pre-build
-pre-build:
+pre-build: dirs
 	@echo "Vanilla build of $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)"
 	@go build -v \
 	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \

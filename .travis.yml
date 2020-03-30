@@ -51,16 +51,16 @@ jobs:
         - sonar-scanner
         #- bash <(curl -s https://codecov.io/bash)
         #- goveralls -coverprofile=coverage.out -service=travis-ci
-    - stage: release
-      name: "Release a new version"
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script:
-          - nvm install lts/*
-          - npx semantic-release
-        on:
-          all_branches: true
+    #- stage: release
+    #  name: "Release a new version"
+    #  deploy:
+    #    provider: script
+    #    cleanup: true
+    #    script:
+    #      - nvm install lts/*
+    #      - npx semantic-release
+    #    on:
+    #      all_branches: true
 
 go:
   - 1.11.x
