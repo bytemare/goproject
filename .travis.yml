@@ -19,18 +19,20 @@ stages:
   #- name: deploy
   #  if: branch = release
 
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-dev"
+      - "python3-pip"
+      - "python3-setuptools"
+
 jobs:
   include:
     - stage: "Static Analysis, Unit Tests and Coverage"
       go: 1.14.x
       name: "GolangCI Linting,  and Snyk Analysis"
       os: linux
-      apt:
-        update: true
-        packages:
-          - python3-dev
-          - python3-pip
-          - python3-setuptools
       install:
         - pip3 install --upgrade pip
         - pip3 install pre-commit
