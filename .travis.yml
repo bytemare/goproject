@@ -48,7 +48,7 @@ jobs:
         sonarcloud:
           organization: "bytemare-github"
           token:
-            secure: ${SONAR_TOKEN}
+            secure: $SONAR_TOKEN
       os: linux
       install:
         - make prepare-tests
