@@ -33,10 +33,10 @@ jobs:
   include:
     - stage: "Static Analysis, Unit Tests and Coverage"
       go: 1.14.x
-      name: "GolangCI Linting,  and Snyk Analysis"
+      name: "GolangCI Linting, and Snyk Analysis"
       os: linux
       install:
-        - make prepare-python3
+        - make prepare-pre-commit
         - npm install -g snyk
       script:
         - pre-commit autoupdate

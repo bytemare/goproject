@@ -68,9 +68,13 @@ prepare-lint:
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
 
 .PHONY: prepare-python3
-prepare-python3: prepare-lint
-	@echo "Installing python3 pre-commit ..."
+prepare-python3:
+	@echo "Installing python3  ..."
 	@sudo apt-get -y install python3.5 python3-pip python3-dev python3-setuptools
+
+.PHONY: prepare-pre-commit
+prepare-pre-commit: prepare-lint
+	@echo "Installing pre-commit ..."
 	@pip3 install pre-commit
 	@pre-commit install
 
