@@ -36,7 +36,9 @@ jobs:
       name: "GolangCI Linting, and Snyk Analysis"
       os: linux
       install:
-        - make prepare-pre-commit
+        - pip3 install pre-commit
+        - pre-commit install
+        - make prepare-lint
         - npm install -g snyk
       script:
         - pre-commit autoupdate

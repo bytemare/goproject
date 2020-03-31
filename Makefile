@@ -75,7 +75,6 @@ prepare-python3:
 .PHONY: prepare-pre-commit
 prepare-pre-commit: prepare-lint
 	@echo "Installing pre-commit ..."
-	@pip3 install pre-commit
 	@pre-commit install
 
 .PHONY: prepare-tests
