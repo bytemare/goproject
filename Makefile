@@ -61,12 +61,24 @@ SHELL := bash
 all:
 
 # Install tools and check environment
-setup:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
-	go get -u github.com/onsi/ginkgo/ginkgo
-	go get -u github.com/onsi/gomega/...
-	pip3 install pre-commit
-	pre-commit install
+
+.PHONY: prepare-lint
+prepare-lint:
+	@echo "Installing golangci-lint ..."
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
+
+.PHONY: prepare-python3
+prepare-python3: prepare-lint
+	@echo "Installing python3 pre-commit ..."
+	@sudo apt-get -y install python3.5 python3-pip python3-dev python3-setuptools
+	@pip3 install pre-commit
+	@pre-commit install
+
+.PHONY: prepare-tests
+prepare-tests:
+	@echo "Installing libs for tests ..."
+	@go get -u github.com/onsi/ginkgo/ginkgo
+	@go get -u github.com/onsi/gomega/...
 
 # Create directories
 .PHONY: dirs

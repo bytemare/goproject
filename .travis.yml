@@ -27,6 +27,8 @@ addons:
       - "python3-pip"
       - "python3-setuptools"
 
+dist: trusty
+
 jobs:
   include:
     - stage: "Static Analysis, Unit Tests and Coverage"
@@ -34,15 +36,11 @@ jobs:
       name: "GolangCI Linting,  and Snyk Analysis"
       os: linux
       install:
-        - pip3 install --upgrade pip
-        - pip3 install pre-commit
-        - make setup
+        - make prepare-python3
         - npm install -g snyk
       script:
-        - make setup
         - pre-commit autoupdate
         - pre-commit run --all-files
-        - make lint
         - snyk test
       after_success:
         - snyk monitor
@@ -54,6 +52,8 @@ jobs:
           token:
             secure: ${SONAR_TOKEN}
       os: linux
+      install:
+        - make prepare-tests
       script:
         - make cover
       after_success:
