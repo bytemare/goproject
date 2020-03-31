@@ -36,6 +36,7 @@ jobs:
       name: "GolangCI Linting, and Snyk Analysis"
       os: linux
       install:
+        - pip3 install --upgrade pip
         - pip3 install pre-commit
         - pre-commit install
         - make prepare-lint
@@ -59,7 +60,7 @@ jobs:
       script:
         - make cover
       after_success:
-        - sonar-scanner
+        - sonar-scanner -X
         #- bash <(curl -s https://codecov.io/bash)
         #- goveralls -coverprofile=coverage.out -service=travis-ci
     #- stage: release
