@@ -86,6 +86,8 @@ func (p *Project) Build() error {
 	return nil
 }
 
+const buildErrFormat = "error : %v\n"
+
 func (p *Project) buildDirs() {
 	if len(p.Layout.Directories) == 0 {
 		return
@@ -97,7 +99,7 @@ func (p *Project) buildDirs() {
 		fmt.Printf("\t> %d : Building directory %s ... ", i, d)
 
 		if err := os.MkdirAll(d, config.DirMode); err != nil {
-			fmt.Printf("error : %v\n", err)
+			fmt.Printf(buildErrFormat, err)
 		} else {
 			fmt.Printf("success.\n")
 		}
@@ -115,7 +117,7 @@ func (p *Project) buildFiles() {
 		fmt.Printf("\t> %d : Build file %s ... ", i, fid)
 
 		if f, err := p.buildFile(fid); err != nil {
-			fmt.Printf("error : %v\n", err)
+			fmt.Printf(buildErrFormat, err)
 		} else {
 			e, err := exists(path.Join(f.directory, f.filename))
 			if e {
@@ -126,7 +128,7 @@ func (p *Project) buildFiles() {
 			}
 
 			if err := f.write(); err != nil {
-				fmt.Printf("error : %v\n", err)
+				fmt.Printf(buildErrFormat, err)
 			}
 			fmt.Printf("success.\n")
 		}

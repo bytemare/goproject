@@ -140,8 +140,8 @@ func profileNew(name string) {
 	if err = config.EditProfile(name); err != nil {
 		fmt.Println(err)
 
-		if _err := os.Remove(filepath); _err != nil {
-			fmt.Printf("Could not remove %s : %s\n", filepath, _err)
+		if err = os.Remove(filepath); err != nil {
+			fmt.Printf("Could not remove %s : %s\n", filepath, err)
 		}
 
 		os.Exit(1)
