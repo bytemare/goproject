@@ -9,6 +9,7 @@ Set up new go projects with personalised layouts and configuration files for you
 [![GoDoc](https://godoc.org/github.com/bytemare/goproject?status.svg)](https://godoc.org/github.com/bytemare/goproject)
 [![fuzzit](https://app.fuzzit.dev/badge?org_id=bytemare-gh)](https://app.fuzzit.dev/orgs/bytemare-gh/dashboard)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fbytemare%2Fgoproject.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fbytemare%2Fgoproject?ref=badge_shield)
 
 
 Concentrate on writing code for your project, and don't waste time setting it up, goproject does it for you.
@@ -28,6 +29,9 @@ Available templates contain advanced CI configuration files, a Dockerfile, and s
     - [Features](#features)
     - [Thanks](#thanks)
     - [Licence](#licence)
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fbytemare%2Fgoproject.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fbytemare%2Fgoproject?ref=badge_large)
 
 ## Install
 
