@@ -75,6 +75,8 @@ prepare-python3:
 .PHONY: prepare-pre-commit
 prepare-pre-commit: prepare-lint
 	@echo "Installing pre-commit ..."
+	@pip3 install --upgrade pip
+	@pip3 install pre-commit
 	@pre-commit install
 
 .PHONY: prepare-tests
@@ -175,8 +177,6 @@ GINKGO ?= $(GOBIN)/ginkgo
 .PHONY: test
 test:
 	@echo "Testing ..."
-
-#@go get -u github.com/onsi/ginkgo/ginkgo
 #@$(GINKGO) -r -v
 
 .PHONY: release

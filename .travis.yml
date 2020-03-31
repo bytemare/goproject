@@ -15,7 +15,7 @@ notifications:
 
 stages:
   - "Static Analysis, Unit Tests and Coverage"
-  - test
+  - "Unit Tests and Coverage"
   #- name: deploy
   #  if: branch = release
 
@@ -34,10 +34,7 @@ jobs:
       name: "GolangCI Linting, and Snyk Analysis"
       os: linux
       install:
-        - pip3 install --upgrade pip
-        - pip3 install pre-commit
-        - pre-commit install
-        - make prepare-lint
+        - make prepare-pre-commit
         - npm install -g snyk
       script:
         - pre-commit autoupdate
