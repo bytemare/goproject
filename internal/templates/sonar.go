@@ -1,6 +1,8 @@
 // Package templates holds the template and project building functions
 package templates
 
+const sonarIdentifier = "sonar"
+
 type sonar struct {
 	*file
 	SonarOrg     string
@@ -21,8 +23,10 @@ func sonarConstructor(project *Project) (*file, error) {
 }
 
 func newSonar(sonarOrg, sonarProject, repoCI, repoURL string) *sonar {
+	f, d, t := sonarValues()
+
 	return &sonar{
-		file:         newFile(sonarIdentifier, sonarFilename, sonarTemplate),
+		file:         newFile(sonarIdentifier, f, d, t),
 		SonarOrg:     sonarOrg,
 		SonarProject: sonarProject,
 		RepoCI:       repoCI,
@@ -42,10 +46,12 @@ func (s *sonar) getTemplate() string {
 	return s.template
 }
 
-const (
-	sonarIdentifier = "sonar"
-	sonarFilename   = "sonar-Project.properties"
-	sonarTemplate   = `# Project identification
+func sonarValues() (f, d, t string) {
+	const filename = "sonar-Project.properties"
+
+	const directory = "."
+
+	const template = `# Project identification
 sonar.organization={{.SonarOrg}}
 sonar.projectKey={{.SonarProject}}
 sonar.projectName={{.SonarProject}}
@@ -77,4 +83,6 @@ sonar.go.coverage.reportPaths=./coverage.out
 # Other Modules
 #sonar.go.golangci-lint.reportPaths=
 `
-)
+
+	return filename, directory, template
+}

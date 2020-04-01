@@ -1,6 +1,8 @@
 // Package templates holds the template and project building functions
 package templates
 
+const readmeIdentifier = "readme"
+
 // readme implements the fileTemplate interface for a Readme
 type readme struct {
 	*file
@@ -14,8 +16,10 @@ func readmeConstructor(project *Project) (*file, error) {
 }
 
 func newReadme(projectName string) *readme {
+	f, d, t := readmeValues()
+
 	return &readme{
-		file:        newFile(readmeIdentifier, readmeFilename, readmeTemplate),
+		file:        newFile(readmeIdentifier, f, d, t),
 		ProjectName: projectName,
 		CI:          nil,
 	}
@@ -33,10 +37,12 @@ func (r *readme) getTemplate() string {
 	return r.template
 }
 
-const (
-	readmeIdentifier = "readme"
-	readmeFilename   = "README"
-	readmeTemplate   = `
+func readmeValues() (f, d, t string) { //nolint:funlen // length is due to a constant, no complexity here
+	const filename = "README"
+
+	const directory = "."
+
+	const template = `
 [Template inspired by Jesse Luoto // https://github.com/jehna/readme-best-practices/blob/master/README-default.md]
 
 # {{.ProjectName}}
@@ -188,4 +194,6 @@ Something like:
 
 "The code in this Project is licensed under MIT license."
 `
-)
+
+	return filename, directory, template
+}

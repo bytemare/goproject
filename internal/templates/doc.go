@@ -1,6 +1,8 @@
 // Package templates holds the template and project building functions
 package templates
 
+const docIdentifier = "doc"
+
 type doc struct {
 	*file
 	PackageName string
@@ -12,8 +14,10 @@ func docConstructor(project *Project) (*file, error) {
 }
 
 func newDoc(packageName string) *doc {
+	f, d, t := docValues()
+
 	return &doc{
-		file:        newFile(docIdentifier, docFilename, docTemplate),
+		file:        newFile(docIdentifier, f, d, t),
 		PackageName: packageName,
 	}
 }
@@ -30,13 +34,17 @@ func (d *doc) getTemplate() string {
 	return d.template
 }
 
-const (
-	docIdentifier = "doc"
-	docFilename   = "doc.go"
-	docTemplate   = `/*
+func docValues() (f, d, t string) {
+	const filename = "doc.go"
+
+	const directory = "."
+
+	const template = `/*
 Package {{.PackageName}} [short description]
 
 */
 package {{.PackageName}}
 `
-)
+
+	return filename, directory, template
+}

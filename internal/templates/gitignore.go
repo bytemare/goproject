@@ -1,15 +1,20 @@
 // Package templates holds the template and project building functions
 package templates
 
+const gitignoreIdentifier = "gitignore"
+
 // gitignoreConstructor returns the file content populated with the relevant values
 func gitignoreConstructor(project *Project) (*file, error) { //nolint:unparam // project is not needed when no variables
-	return newProjectFile(newFile(gitignoreIdentifier, gitignoreFilename, gitignoreTemplate))
+	f, d, t := gitignoreValues()
+	return newProjectFile(newFile(gitignoreIdentifier, f, d, t))
 }
 
-const (
-	gitignoreIdentifier = "gitignore"
-	gitignoreFilename   = ".gitignore"
-	gitignoreTemplate   = `# Binaries for programs and plugins
+func gitignoreValues() (f, d, t string) {
+	const filename = ".gitignore"
+
+	const directory = "."
+
+	const template = `# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
@@ -29,4 +34,6 @@ const (
 bin
 coverage
 `
-)
+
+	return filename, directory, template
+}

@@ -1,20 +1,25 @@
 // Package templates holds the template and project building functions
 package templates
 
+const makefileIdentifier = "makefile"
+
 // makefileConstructor returns the file content populated with the relevant values
 func makefileConstructor(project *Project) (*file, error) { //nolint:unparam // project is not needed when no variables
-	return newProjectFile(newFile(makefileIdentifier, makefileFilename, makefileTemplate))
+	f, d, t := makefileValues()
+	return newProjectFile(newFile(makefileIdentifier, f, d, t))
 }
 
-const (
-	makefileIdentifier = "makefile"
-	makefileFilename   = "Makefile"
-	makefileTemplate   = `#
+func makefileValues() (f, d, t string) { //nolint:funlen // length is due to a constant, no complexity here
+	const filename = "Makefile"
+
+	const directory = "."
+
+	const template = `#
 # Some copyright
 #
 
 # Target main files
-TARGETS  := "./cmd/goproject"
+TARGETS  := ""
 
 # Project path and name
 PROJECT_REPO := $(shell go list -m)
@@ -237,4 +242,6 @@ docker-run:
 	    --rm -i
 
 `
-)
+
+	return filename, directory, template
+}

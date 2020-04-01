@@ -1,6 +1,8 @@
 // Package templates holds the template and project building functions
 package templates
 
+const travisIdentifier = "travis"
+
 type travis struct {
 	*file
 	RepoURL  string
@@ -17,8 +19,10 @@ func travisConstructor(project *Project) (*file, error) {
 }
 
 func newTravis(repoURL, sonarOrg string) *travis {
+	f, d, t := travisValues()
+
 	return &travis{
-		file:     newFile(travisIdentifier, travisFilename, travisTemplate),
+		file:     newFile(travisIdentifier, f, d, t),
 		RepoURL:  repoURL,
 		SonarOrg: sonarOrg,
 	}
@@ -36,10 +40,12 @@ func (t *travis) getTemplate() string {
 	return t.template
 }
 
-const (
-	travisIdentifier = "travis"
-	travisFilename   = ".travis.yml"
-	travisTemplate   = `language: go
+func travisValues() (f, d, t string) {
+	const filename = ".travis.yml"
+
+	const directory = "."
+
+	const template = `language: go
 
 env:
   - GO111MODULE=on
@@ -56,27 +62,36 @@ notifications:
 
 stages:
   - "Static Analysis, Unit Tests and Coverage"
-  - test
+  - "Unit Tests and Coverage"
   #- name: deploy
-  #    if: branch = master
+  #  if: branch = release
+
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-dev"
+      - "python3-pip"
+      - "python3-setuptools"
 
 jobs:
   include:
     - stage: "Static Analysis, Unit Tests and Coverage"
-      go: 1.13.x
-      name: "GolangCI Linting and Snyk Analysis"
+      go: 1.14.x
+      name: "GolangCI Linting, and Snyk Analysis"
       os: linux
       install:
-        - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+        - make prepare-pre-commit
         - npm install -g snyk
       script:
-        - golangci-lint run -v ./...
+        - pre-commit autoupdate
+        - pre-commit run --all-files
         - snyk test
       after_success:
         - snyk monitor
-    - go: 1.13.x
+    - go: 1.14.x
       name: "Unit Tests and Coverage"
-	  {{if .SonarOrg -}}
+      {{if .SonarOrg -}}
       addons:
         sonarcloud:
           organization: "{{.SonarOrg}}"
@@ -84,22 +99,41 @@ jobs:
             secure: ${SONAR_TOKEN}
 	  {{end}}
       os: linux
+      install:
+        - make prepare-tests
       script:
-        - go test -v -race -coverprofile=coverage.out -covermode=atomic
+        - make cover
       after_success:
-        - sonar-scanner
-        - bash <(curl -s https://codecov.io/bash)
-        - goveralls -coverprofile=coverage.out -service=travis-ci
+        - sonar-scanner -X
+        #- bash <(curl -s https://codecov.io/bash)
+        #- goveralls -coverprofile=coverage.out -service=travis-ci
+    #- stage: release
+    #  name: "Release a new version"
+    #  deploy:
+    #    provider: script
+    #    cleanup: true
+    #    script:
+    #      - nvm install lts/*
+    #      - npx semantic-release
+    #    on:
+    #      all_branches: true
 
 go:
   - 1.11.x
   - 1.12.x
   - 1.13.x
+  - 1.14.x
 os:
   - linux
   - osx
   - windows
 script:
-  - go test -v -race
+  - if [ "$TRAVIS_OS_NAME" = "windows" ];
+    then go test -v -i -race -covermode=atomic;
+    else make test;
+    fi
+
 `
-)
+
+	return filename, directory, template
+}
