@@ -77,6 +77,9 @@ go:
 os:
   - linux
   - osx
-  #- windows
+  - windows
 script:
-  - make test
+  - if [ "$TRAVIS_OS_NAME" = "windows" ];
+    then go test -v -i -race -covermode=atomic;
+    else make test;
+    fi

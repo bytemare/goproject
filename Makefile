@@ -91,7 +91,7 @@ GINKGO ?= $(GOBIN)/ginkgo
 .PHONY: dirs
 dirs:
 	@echo "Creating dirs ..."
-	@mkdir -v -p $@
+	@mkdir -v -p $(BUILD_DIR) $(COVERAGE)
 
 .PHONY: values
 values:

@@ -77,7 +77,7 @@ go get github.com/bytemare/goproject
 
 ## Configuration
 
-The goproject app is configured through environment variables and a file placed in your user's default configuration directory:
+The goproject app is configured through environment variables or a file placed in your user's default configuration directory:
 
 > TODO: give a path and file content example
 
@@ -123,7 +123,7 @@ Create a profile, when you don't want to use the default one.
 
 Nothing simpler
 
-'''goproject new'''
+> TODO '''goproject new'''
 
 ### Deploy files within an already existing project
 
@@ -132,7 +132,7 @@ goproject won't write over files that already exist, and you can launch it withi
 
 Not giving 'goproject new' any arguments will take the current directory's name as the project repo to build in, and thus its name.
 
-'''
+> TODO '''
 git clone path/remote/repo/project
 cd project
 ls -al
@@ -147,11 +147,11 @@ Now you should verify these files, and add and commit them if they suit you.
 
 ## Changelog
 
-{{.Changelog}}
+> TODO {{.Changelog}}
 
 ## Features
 
-{{.Features}}
+> TODO {{.Features}}
 
 
 - Layout
@@ -203,4 +203,4 @@ goproject tries to follow how modern go projects are laid out, based on personal
 
 ## Licence
 
-add licence id and licence scan result
+> TODO add licence id and licence scan result

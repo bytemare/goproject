@@ -1,5 +1,5 @@
 # 1. Build env
-FROM golang:1.13.5-alpine AS build-envv
+FROM golang:1.14.x-alpine AS build-envv
 ADD goproject goproject
 
 WORKDIR $GOPATH/src/github.com/bytemare/goproject/
