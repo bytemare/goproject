@@ -19,12 +19,12 @@ func GetCommit() string {
 	return commit
 }
 
-// PrintableVersion returns a string representing the version and commit tag the binary was build with
+// PrintableVersion returns a string representing the version, commit tag and date of built
 func PrintableVersion() string {
-	return fmt.Sprintf("Version %s:%s - compiled at %s", version, commit, date)
+	return fmt.Sprintf("Version %s:%s - compiled on %s", version, commit, date)
 }
 
 // Upgrade attempts to upgrade the program to the latest version
 func Upgrade() {
-	fmt.Printf("%s - Upgrade not implemented yet.\n", PrintableVersion())
+	fmt.Printf("Upgrade not implemented yet - %s\n", PrintableVersion())
 }

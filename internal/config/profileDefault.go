@@ -10,15 +10,17 @@ const (
 	contact = "dev@bytema.re"
 
 	[layout]
-	directories = ["cmd", "internal", "internal/config", "internal/commands"]
+	directories = ["cmd", "internal", "internal/commands", "internal/config", "internal/version"]
 	files = [ "gitignore",
 	        "doc",
 	        "dockerfile",
 	        "golangci",
 			"makefile",
+			"pre-commit",
 	        "readme",
 	        "sonar",
-	        "travis"
+	        "travis",
+			"version"
 		]
 
 	[git]
@@ -42,15 +44,17 @@ const (
 	contact = ""
 
 	[layout]
-	directories = ["cmd", "internal"]
+	directories = ["cmd", "internal", "internal/commands", "internal/config", "internal/version"]
 	files = [ "gitignore",
 	        "doc",
 	        "dockerfile",
 	        "golangci",
-			"makefile"
+			"makefile",
+			"pre-commit",
 	        "readme",
 	        "sonar",
-	        "travis"
+	        "travis",
+			"version"
 		]
 
 	[git]
