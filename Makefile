@@ -85,6 +85,8 @@ prepare-tests:
 	@go get -u github.com/onsi/ginkgo/ginkgo
 	@go get -u github.com/onsi/gomega/...
 
+GINKGO ?= $(GOBIN)/ginkgo
+
 # Create directories
 .PHONY: dirs
 dirs:
@@ -172,11 +174,9 @@ cover:
 		    -coverpkg=$(PACKAGES) \
 		    -coverprofile=$(COVERAGE)/unit-`echo $$PACK | tr "/" "_"`.out; done
 
-GINKGO ?= $(GOBIN)/ginkgo
-# TODO: don't install here, but add it in setup or fix a target
 .PHONY: test
 test:
-	@echo "Testing ..."
+	@echo "Testing ... TODO."
 #@$(GINKGO) -r -v
 
 .PHONY: release

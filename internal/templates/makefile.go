@@ -14,7 +14,7 @@ const (
 #
 
 # Target main files
-TARGETS  := ""
+TARGETS  := "./cmd/goproject"
 
 # Project path and name
 PROJECT_REPO := $(shell go list -m)
@@ -72,13 +72,31 @@ SHELL := bash
 all:
 
 # Install tools and check environment
-setup:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
-	go get -u github.com/securego/gosec/cmd/gosec
-	go get -u github.com/onsi/ginkgo/ginkgo
-	go get -u github.com/onsi/gomega/...
-	pip3 install pre-commit
-	pre-commit install
+
+.PHONY: prepare-lint
+prepare-lint:
+	@echo "Installing golangci-lint ..."
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
+
+.PHONY: prepare-python3
+prepare-python3:
+	@echo "Installing python3  ..."
+	@sudo apt-get -y install python3.5 python3-pip python3-dev python3-setuptools
+
+.PHONY: prepare-pre-commit
+prepare-pre-commit: prepare-lint
+	@echo "Installing pre-commit ..."
+	@pip3 install --upgrade pip
+	@pip3 install pre-commit
+	@pre-commit install
+
+.PHONY: prepare-tests
+prepare-tests:
+	@echo "Installing libs for tests ..."
+	@go get -u github.com/onsi/ginkgo/ginkgo
+	@go get -u github.com/onsi/gomega/...
+
+GINKGO ?= $(GOBIN)/ginkgo
 
 # Create directories
 .PHONY: dirs
@@ -113,9 +131,6 @@ values:
 	@echo "BUILD_DIR :" $(BUILD_DIR)
 	@echo "COVERAGE :" $(COVERAGE)
 	@echo "SECCOMP :" $(SECCOMP)
-	s:= $(shell echo hello)
-	cp_single:= '$(s)'
-	#cp_double:=
 
 .PHONY: fmt
 fmt:
@@ -128,14 +143,14 @@ lint: fmt
 	@go vet ./...
 	@golangci-lint run --fix ./...
 
-#sec:
-#	@echo "Checking security ..."
-#	@go get -u github.com/securego/gosec/cmd/gosec
-#	@gosec ./...
+.PHONY: pre-commit
+pre-commit:
+	@echo "Extensive checking with pre-commit ..."
+	@pre-commit run --all-files
 
 # Build a first time to read symbol location, then a 2nd time with loading LD FLAGS
 .PHONY: pre-build
-pre-build:
+pre-build: dirs
 	@echo "Vanilla build of $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)"
 	@go build -v \
 	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \
@@ -168,13 +183,12 @@ cover:
 		echo "Testing $(PACK)" \
 		go test -v -i -race -covermode=atomic \
 		    -coverpkg=$(PACKAGES) \
-		   -coverprofile=$(COVERAGE)/unit-` + "echo $$PACK | tr \"/\" \"_\"`" + `.out
+		    -coverprofile=$(COVERAGE)/unit-` + "echo $$PACK | tr \"/\" \"_\"`" + `.out
 
-GINKGO ?= $(GOBIN)/ginkgo
 .PHONY: test
 test:
-	@echo "Testing ..."
-	@$(GINKGO) -r -v
+	@echo "Testing ... TODO."
+#@$(GINKGO) -r -v
 
 .PHONY: release
 release: lint
