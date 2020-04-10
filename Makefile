@@ -24,7 +24,7 @@ SYMBOL_NAME_VERSION := "version"
 SYMBOL_NAME_COMMIT  := "commit"
 SYMBOL_NAME_DATE    := "date"
 
-SYMBOLS             =$(shell (go tool nm "$(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)" | grep "$(BINARY)" | grep " D " | cut -d ' ' -f5))
+SYMBOLS             =$(shell (go tool nm "$(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY)" | grep "$(BINARY)" | rev | grep " D " | cut -d ' ' -f1 | rev)) # rev is a hack to get the last field
 SYMBOL_PATH_VERSION =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_VERSION)$$"))
 SYMBOL_PATH_COMMIT  =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_COMMIT)$$"))
 SYMBOL_PATH_DATE    =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_NAME_DATE)$$"))
