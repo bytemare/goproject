@@ -4,9 +4,9 @@ package version
 import "fmt"
 
 var (
-	version = "?" //nolint:gochecknoglobals // used at compile time to inject app version
-	commit  = "?" //nolint:gochecknoglobals // used at compile time to inject commit hash
-	date    = "?" //nolint:gochecknoglobals // used at compile time to inject compilation time
+	version = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject app version
+	commit  = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject commit hash
+	date    = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject compilation time
 )
 
 // GetVersion returns the version the program was compiled with

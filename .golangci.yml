@@ -5,7 +5,6 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
     - errcheck
     - funlen
     - gochecknoglobals
@@ -43,6 +42,7 @@ linters:
     - varcheck
     - whitespace
     - wsl
+    # - dupl
   presets:
     - bugs
     - unused

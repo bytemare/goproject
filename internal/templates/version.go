@@ -3,10 +3,35 @@ package templates
 
 const versionIdentifier = "version"
 
-// docConstructor returns the file content populated with the relevant values
+type version struct {
+	*file
+	PackageName string
+}
+
+// versionConstructor returns the file content populated with the relevant values
 func versionConstructor(project *Project) (*file, error) { //nolint:unparam // project is not needed when no variables
+	return newProjectFile(newVersion(project.Name))
+}
+
+func newVersion(packageName string) *version {
 	f, d, t := versionValues()
-	return newProjectFile(newFile(versionIdentifier, f, d, t))
+
+	return &version{
+		file:        newFile(versionIdentifier, f, d, t),
+		PackageName: packageName,
+	}
+}
+
+func (v *version) getIdentifier() string {
+	return v.identifier
+}
+
+func (v *version) getFilename() string {
+	return v.filename
+}
+
+func (v *version) getTemplate() string {
+	return v.template
 }
 
 func versionValues() (f, d, t string) {
@@ -14,15 +39,15 @@ func versionValues() (f, d, t string) {
 
 	const directory = "internal/version"
 
-	const template = `// Package version holds all the goproject's core mechanisms
+	const template = `// Package version holds all the {{.PackageName}}'s core mechanisms
 package version
 
 import "fmt"
 
 var (
-	version = "?" //nolint:gochecknoglobals // used at compile time to inject app version
-	commit  = "?" //nolint:gochecknoglobals // used at compile time to inject commit hash
-	date    = "?" //nolint:gochecknoglobals // used at compile time to inject compilation time
+	version = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject app version
+	commit  = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject commit hash
+	date    = "?" //nolint:gochecknoglobals // package scoped / set at compile time to inject compilation time
 )
 
 // GetVersion returns the version the program was compiled with

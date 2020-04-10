@@ -65,7 +65,11 @@ all:
 .PHONY: prepare-lint
 prepare-lint:
 	@echo "Installing golangci-lint ..."
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
+	path := $(which golangci-lint)
+	ifeq (echo $?,1)
+		@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin latest
+	endif
+
 
 .PHONY: prepare-python3
 prepare-python3:
@@ -75,9 +79,12 @@ prepare-python3:
 .PHONY: prepare-pre-commit
 prepare-pre-commit: prepare-lint
 	@echo "Installing pre-commit ..."
-	@pip3 install --upgrade pip
-	@pip3 install pre-commit
-	@pre-commit install
+	path := $(which pre-commit)
+    ifeq (echo $?,1)
+    	@pip3 install --upgrade pip
+        @pip3 install pre-commit
+        @pre-commit install
+    endif
 
 .PHONY: prepare-tests
 prepare-tests:
@@ -86,6 +93,26 @@ prepare-tests:
 	@go get -u github.com/onsi/gomega/...
 
 GINKGO ?= $(GOBIN)/ginkgo
+
+.PHONY: setup-ci-linux
+setup-ci-linux:
+	prepare-python3
+	prepare-pre-commit
+
+.PHONY: setup-ci-mac
+setup-ci-mac:
+	brew install pre-commit golangci-lint
+
+.PHONY: setup-ci
+setup-ci:
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		setup-ci-linux
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		setup-ci-mac
+	endif
+
 
 # Create directories
 .PHONY: dirs
@@ -146,7 +173,7 @@ pre-build: dirs
 	    $(TARGETS)
 
 .PHONY: build
-build: lint pre-build
+build: | lint pre-build
 	@echo "Fetching symbols and Building $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH) with flags"
 	@go build -v \
 	    -ldflags '$(LD_ALL_FLAGS)' \
