@@ -140,7 +140,7 @@ values:
 	@echo "LD_BIN_INFO :" $(LD_BIN_INFO)
 	@echo "LD_STATIC :" $(LD_STATIC)
 	@echo "LD_LIGHT :" $(LD_LIGHT)
-	@echo "LD_ALL_FLAGS :" $(LD_ALL_FLAGS)
+	@echo "LD_ALL_FLAGS :" '$(LD_ALL_FLAGS)'
 	@echo "OS :" $(OS)
 	@echo "ARCH :" $(ARCH)
 	@echo "PLATFORMS :" $(PLATFORMS)
@@ -184,8 +184,7 @@ build: | lint pre-build
 install: lint
 	@echo "Installing $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)""
 	@go install -v \
-	    -ldflags $(LD_ALL_FLAGS) \
-	    -o $(BUILD_DIR)/$(OS)_$(ARCH)/$(BINARY) \
+	    -ldflags '$(LD_ALL_FLAGS)' \
 	    $(TARGETS)
 
 .PHONY: uninstall
@@ -242,7 +241,7 @@ build-docker:
 	@$(DOCKER_GO_COMPILER_ENV) \
 	 go build -a -msan -u \
 	    --tags netgo \
-	    -ldflags $(LD_ALL_FLAGS) \
+	    -ldflags '$(LD_ALL_FLAGS)' \
 	    -o $(BINARY) \
 	    $(TARGETS)
 
