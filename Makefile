@@ -181,8 +181,8 @@ build: | lint pre-build
 	    $(TARGETS)
 
 .PHONY: install
-install: lint
-	@echo "Installing $(BINARY) in $(BUILD_DIR)/$(OS)_$(ARCH)""
+install: lint pre-build
+	@echo "Installing $(BINARY) ..."
 	@go install -v \
 	    -ldflags '$(LD_ALL_FLAGS)' \
 	    $(TARGETS)
