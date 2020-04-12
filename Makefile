@@ -186,6 +186,7 @@ install: lint pre-build
 	@go install -v \
 	    -ldflags '$(LD_ALL_FLAGS)' \
 	    $(TARGETS)
+	@echo "Installed at $(shell which $(BINARY))"
 
 .PHONY: uninstall
 uninstall:
