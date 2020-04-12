@@ -60,6 +60,10 @@ SHELL := bash
 
 all:
 
+.PHONY: clean
+clean:
+	rm -rf $(BUILD_DIR) $(COVERAGE)
+
 # Install tools and check environment
 
 .PHONY: prepare-lint
@@ -96,8 +100,8 @@ GINKGO ?= $(GOBIN)/ginkgo
 
 .PHONY: setup-ci-linux
 setup-ci-linux:
-	prepare-python3
-	prepare-pre-commit
+	$(call prepare-python3)
+	$(call prepare-pre-commit)
 
 .PHONY: setup-ci-mac
 setup-ci-mac:
@@ -107,10 +111,10 @@ setup-ci-mac:
 setup-ci:
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
-		setup-ci-linux
+		$(call setup-ci-linux)
 	endif
 	ifeq ($(UNAME_S),Darwin)
-		setup-ci-mac
+		$(call setup-ci-mac)
 	endif
 
 
@@ -187,6 +191,7 @@ install: lint pre-build
 	    -ldflags '$(LD_ALL_FLAGS)' \
 	    $(TARGETS)
 	@echo "Installed at $(shell which $(BINARY))"
+	$(call clean)
 
 .PHONY: uninstall
 uninstall:
@@ -214,10 +219,6 @@ release: lint
 .PHONY: version
 version:
 	@echo $(VERSION) - $(COMMIT)
-
-.PHONY: clean
-clean:
-	rm -rf $(BUILD_DIR) $(COVERAGE)
 
 #
 #   Docker
