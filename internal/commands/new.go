@@ -4,6 +4,9 @@ package commands
 import (
 	"fmt"
 	"os"
+	"path"
+
+	"github.com/pkg/errors"
 
 	"github.com/bytemare/goproject/internal/config"
 	"github.com/bytemare/goproject/internal/templates"
@@ -32,14 +35,13 @@ Will do the same but with the specified profile
 `,
 		Args: cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			setupNewProject(cmd, args)
-
-			if err := checkVars(); err != nil {
+			name, location, profile, err := setupNewProject(cmd, args)
+			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 
-			newProject()
+			newProject(name, location, profile)
 		},
 	}
 
@@ -48,59 +50,86 @@ Will do the same but with the specified profile
 	return newCmd
 }
 
-func setupNewProject(cmd *cobra.Command, args []string) {
-	// If no argument was given, we develop the project inside the current directory, thus inheriting its name
-	if len(args) == 0 {
-		wd, err := os.Getwd()
-		if err != nil {
-			fmt.Printf("Unable to get working directory : %s\n", err)
-			os.Exit(1)
-		}
-
-		viper.Set("name", wd)
-	} else {
-		viper.Set("name", args[0])
+func setupNewProject(cmd *cobra.Command, args []string) (name, location string, profile *config.Profile, err error) {
+	// Verify and set project location and name
+	pname, location, err := setupProjectDirectory(args)
+	if err != nil {
+		return "", "", nil, err
 	}
 
+	setProjectNameLocation(pname, location)
+
+	// Verify and set the user profile to use
 	if cmd.Flag("profile").Value.String() != "" {
 		viper.Set("profile", cmd.Flag("profile").Value.String())
 	}
+
+	profile, err = setProfile(cmd.Flag("profile").Value.String())
+
+	return pname, location, profile, err
 }
 
-// checkVars verifies all necessary information is given to build a new project
-func checkVars() error {
-	// todo project name, profile
-	return nil
-}
-
-func newProject() {
+func setProfile(profileName string) (*config.Profile, error) {
 	// If profile is given
-	profileName := viper.GetString("profile")
 	if profileName == "" {
-		fmt.Println("Loading default profile")
 		// No profile was specified, we're therefore calling the default profile
+		fmt.Println("Loading default profile")
+
 		profileName = viper.GetString(config.DefaultConfigProfileKeyName)
+
 		if profileName == "" {
-			fmt.Println("Error : no profile was specified, and no default profile was found.")
-			os.Exit(1)
+			return nil, errors.New("error : no profile was specified, and no default profile was found")
 		}
 	}
 
-	prof, err := config.LoadProfile(profileName)
+	profile, err := config.LoadProfile(profileName)
+	if err == nil {
+		viper.Set("profile", profileName)
+	}
+
+	return profile, err
+}
+
+func setupProjectDirectory(args []string) (pname, location string, err error) {
+	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", "", errors.Wrap(err, "unable to get working directory")
 	}
 
-	// Initiate and create project
-	projectName := viper.GetString("name")
-
-	projectLocation := viper.GetString("location")
-	if projectLocation == "" {
-		projectLocation = config.DefaultTargetProjectLocation
+	// If no argument was given, we develop the project inside the current directory, thus inheriting its name
+	if len(args) == 0 {
+		pname = path.Base(wd)
+		location = wd
+	} else {
+		pname, location, err = newProjectDirectory(wd, args[0])
 	}
 
-	project := templates.NewProject(prof, projectName, projectLocation)
+	return pname, location, err
+}
+
+func newProjectDirectory(wd, argument string) (pname, location string, err error) {
+	// Create Project destination folder
+	if err := os.MkdirAll(argument, config.DirMode); err != nil {
+		return "", "", errors.Wrapf(err, "Could not build project directory in '%s'", argument)
+	}
+
+	fmt.Printf("Build project directory %s\n", argument)
+
+	if err := os.Chdir(argument); err != nil {
+		return "", "", errors.Wrapf(err, "Could not change into project directory '%s'", argument)
+	}
+
+	return path.Base(argument), path.Join(wd, argument), nil
+}
+
+func setProjectNameLocation(pname, location string) {
+	viper.Set("name", pname)
+	viper.Set("location", location)
+}
+
+func newProject(name, location string, profile *config.Profile) {
+	// Arguments are set and validated, initiated new project
+	project := templates.NewProject(profile, name, location)
 
 	// Build project
 	if err := project.Build(); err != nil {
@@ -108,6 +137,6 @@ func newProject() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Project %s was successfully created.\n", projectName)
+	fmt.Printf("Project %s was successfully created.\n", name)
 	os.Exit(0)
 }

@@ -6,11 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 
 	"github.com/bytemare/goproject/internal/config"
-
-	"github.com/pkg/errors"
 )
 
 // Project structure contains all the necessary information regarding a Project,
@@ -35,7 +32,7 @@ func NewProject(prof *config.Profile, name, location string) *Project {
 	project := &Project{
 		Profile: prof,
 		Name:    name,
-		Path:    filepath.Join(location, name),
+		Path:    location,
 		Layout: layout{
 			Directories: make([]string, 0),
 			Files:       make([]string, 0),
@@ -53,23 +50,6 @@ func NewProject(prof *config.Profile, name, location string) *Project {
 
 // Build creates the Project structure and writes files
 func (p *Project) Build() error {
-	// If we are already in a directory named after the project, don't create it again
-	wd, err := os.Getwd()
-	if err != nil {
-		return errors.Wrapf(err, "unable to get working directory")
-	}
-
-	if path.Base(wd) != p.Name {
-		// Create Project destination folder if it does not exist already
-		if err := os.MkdirAll(p.Path, config.DirMode); err != nil {
-			return err
-		}
-
-		if err := os.Chdir(p.Path); err != nil {
-			return errors.Wrapf(err, "could not build Project in '%s'", p.Path)
-		}
-	}
-
 	// Build the directory and file layout
 	p.buildDirs()
 	p.buildFiles()
