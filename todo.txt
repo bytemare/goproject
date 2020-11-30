@@ -1,0 +1,89 @@
+
+- makefile : call commands inside other commands
+
+- Sonar : fix travis
+
+- change naming convention :
+instead of naming the used profile 'default profile', say 'active profile'
+
+- dont put own creds into default profile template, but use 'newProfile' with dummy values
+
+- add a side tool, an other binary, to generate new template files from a template template
+
+- pre-commit/push hook to test semver
+
+- testing :
+    - first fuzz : oss-fuzz; go-fuzz, fuzzit
+    - then make tests with : github.com/onsi/ginkgo/ginkgo
+
+- CI conf linters :
+    - travis, appveyor, circleci
+
+
+DOC :
+
+if you already have a project created, say on GitHub, you may want to git clone it, cd into it, and simply make a
+goproject new
+this will create the files and layout for a project based on the directory you are in
+
+
+- README template
+cf golangci-lint to generate the readme with values like latest release version, changelog, etc.
+
+- acknowledge race condition between checking if a file already exists and its creation, check if go has a mechanism for that
+
+
+# Add some explanations on readme
+    - basics
+    - contributing for new file templates
+
+
+# gorelease
+
+# go generate through make to create new template file
+
+# semantic-release for CI environment
+
+conduct			string
+	changelog		string
+	contributing	string
+	license			cmd.License
+	readme			string
+
+
+
+
+
+# 5. Versioning and releasing
+- lock versions of tools and dependencies
+
+# 4. Auto updates
+    - automatic upgrades
+
+
+
+
+# 3. Add tooling
+ - enrich with options and tooling
+
+
+# 4. Docker
+- include docker in makefile
+- include k8 in makefile
+- install go2seccomp
+- verify if we can integrate security profiles (seccomp, apparmor, ...) into the container, and run
+     them with the entrypoint : ENTRYPOINT ["seccomp="..." apparmor="..." /bin/goproject"]
+
+
+- run tests inside docker if docker is available
+
+
+
+# 7. Other enhancements
+    - verify if using upx is safe : test and try to make it fail (with a fuzzer ?)
+
+     - enforce vanity URLs for the package
+
+     - https://github.com/ntpsec/ntpsec
+
+     - set proxy/redirect so code can be pulled with bytema.re/goproject, go.bytema.re, bytema.re/go

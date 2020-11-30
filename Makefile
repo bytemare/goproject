@@ -31,7 +31,7 @@ SYMBOL_PATH_DATE    =$(shell (echo $(SYMBOLS) | tr " " "\n" | grep "\.$(SYMBOL_N
 LD_BIN_INFO         = -X "'$(SYMBOL_PATH_VERSION)=$(VERSION)'" -X "'$(SYMBOL_PATH_COMMIT)=$(COMMIT)'" -X "'$(SYMBOL_PATH_DATE)=$(DATE)'"
 LD_STATIC           := -extldflags "-static" -installsuffix "-static"
 LD_LIGHT            := -s -w
-#LD_NO_UNSAFE_PKG    := -u
+#LD_NO_UNSAFE_PKG    := -u # don't use unsafe packages
 LD_ALL_FLAGS        = $(LD_BIN_INFO) $(LD_STATIC) $(LD_LIGHT)
 
 # Go env vars
@@ -62,6 +62,7 @@ all:
 
 .PHONY: clean
 clean:
+	@echo "Cleaning up ..."
 	rm -rf $(BUILD_DIR) $(COVERAGE)
 
 # Install tools and check environment
@@ -191,7 +192,6 @@ install: lint pre-build
 	    -ldflags '$(LD_ALL_FLAGS)' \
 	    $(TARGETS)
 	@echo "Installed at $(shell which $(BINARY))"
-	$(call clean)
 
 .PHONY: uninstall
 uninstall:
